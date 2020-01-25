@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<h3 class = 'text-center'>
+	{% if requests.count > 0 %}
+		Ваши заявки
+	{% else %}
+		Заявок нет
+	{% endif %}
+</h3>
+
+<div class = 'my-request'>
+<table class="table" id='main_table' onload='alert(this.rows.length)'>
+	<br>
+	{% if requests.count > 0 %}
+	<tr>
+		<td class="text-center"><strong>Авто</strong></td>
+		<td class="text-center"><strong>Статус заявки</strong></td>
+		<td class="text-center"><strong>Дата заявки</strong></td>
+		<td class="text-center"><strong>Доставка</strong></td>
+		<td class="text-center"><strong>Адрес доставки</strong></td>
+		<td class="text-center"><strong>Общая стоимость</strong></td>
+		<td class="text-center"></td>
+	</tr>
+	{% endif %}
+	{% for request in requests %}
+	<tr>
+		<td class="text-center">{{ request.car }}</td>
+		
+		<td class="text-center">{{ request.request_status }}</td>
+		<td class="text-center">{{ request.date_request }}</td>
+		<!--<td class="text-center"></td>-->
+		<td class="text-center">
+			
+			<form action = '' method="GET">
+				<!--<input type="text" name="delivery" class = "requests-delivery" data-id = '{{ request.id }}' value="{{ request.delivery }}">-->
+				<!--<select size="1" name="delivery" class="requests-delivery" data-id = '{{ request.id }}' value="{{ request.delivery }}" >
+					<option value="Нет">Нет</option>
+					<option value="Да">Да</option>
+				</select>-->
+				<!--<p><input type="radio" name="delivery" class = "requests-delivery" data-id = '{{ request.id }}' value="Нет">Нет</p>
+				<p><input type="radio" name="delivery" class = "requests-delivery" data-id = '{{ request.id }}' value="Да">Да</p>-->
+				{% if request.request_status != 'принята' %}
+				<button name="delivery" id = "requests-delivery" class='btn btn-default' data-id = '{{ request.id }}' value="{{ request.delivery }}">{{ request.delivery }}</button>
+				{% else %}
+				{{ request.delivery }}
+				{% endif %}
+
+			</form>
+		</td>
+		<td class="text-center" id='request-delivery-address-{{ request.id }}'>{{ request.delivery_address }}</td>
+		<td class="text-center" id = 'request-cost-with-delivery-{{ request.id }}'>{{ request.cost }}$</td>
+		{% if request.request_status != 'принята' %}
+		<td class="text-center"><a href = '{% url "remove_from_request" mycar_slug=request.car.slug %}'><button class="btn btn-default">Удалить заявку</button></td>
+		{% endif %}
+	</tr>
+	{% endfor %}
+</table>
+<a href='{% url "order" %}'><button class='btn btn-info'>Ваш заказ</button></a>
+</div>
+
+
+<script src='{% static "js/jquery.js" %}'></script>
+<script>
+	$(document).ready(function(){
+		$('#requests-delivery').on('click', function(){
+			delivery = $(this).val()
+			request_id = $(this).attr('data-id')
+			if (delivery == "Нет"){
+				delivery = "Да"
+			}
+			else 
+				delivery = "Нет"
+			data = {
+				delivery: delivery,
+				request_id: request_id
+			}
+			$.ajax({
+				type: "GET",
+				url: '{% url "change_request_delivery" %}',
+				data: data,
+				success: function(data){
+					$('#request-delivery-address-'+ request_id).html(data.delivery_address)
+					$('#request-cost-with-delivery-'+ request_id).html(data.cost_with_delivery)
+				}
+			})
+		})
+	})
+</script>
+{% endblock content %}

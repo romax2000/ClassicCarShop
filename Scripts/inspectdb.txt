@@ -1,0 +1,230 @@
+class AuthGroup(models.Model):
+    name = models.CharField(unique=True, max_length=150, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'auth_group'
+
+
+class AuthGroupPermissions(models.Model):
+    group = models.ForeignKey(AuthGroup, models.DO_NOTHING)
+    permission = models.ForeignKey('AuthPermission', models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'auth_group_permissions'
+        unique_together = (('group', 'permission'),)
+
+
+class AuthPermission(models.Model):
+    name = models.CharField(max_length=255, blank=True, null=True)
+    content_type = models.ForeignKey('DjangoContentType', models.DO_NOTHING)
+    codename = models.CharField(max_length=100, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'auth_permission'
+        unique_together = (('content_type', 'codename'),)
+
+
+class AuthUser(models.Model):
+    password = models.CharField(max_length=128, blank=True, null=True)
+    last_login = models.DateTimeField(blank=True, null=True)
+    is_superuser = models.BooleanField()
+    username = models.CharField(unique=True, max_length=150, blank=True, null=True)
+    first_name = models.CharField(max_length=30, blank=True, null=True)
+    last_name = models.CharField(max_length=150, blank=True, null=True)
+    email = models.CharField(max_length=254, blank=True, null=True)
+    is_staff = models.BooleanField()
+    is_active = models.BooleanField()
+    date_joined = models.DateTimeField()
+
+    class Meta:
+        managed = False
+        db_table = 'auth_user'
+
+
+class AuthUserGroups(models.Model):
+    user = models.ForeignKey(AuthUser, models.DO_NOTHING)
+    group = models.ForeignKey(AuthGroup, models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'auth_user_groups'
+        unique_together = (('user', 'group'),)
+
+
+class AuthUserUserPermissions(models.Model):
+    user = models.ForeignKey(AuthUser, models.DO_NOTHING)
+    permission = models.ForeignKey(AuthPermission, models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'auth_user_user_permissions'
+        unique_together = (('user', 'permission'),)
+
+
+class Cars(models.Model):
+    id = models.BigIntegerField(primary_key=True)
+    mark = models.CharField(max_length=30)
+    model = models.CharField(max_length=60)
+    carcass = models.CharField(max_length=100)
+    years_of_productions = models.CharField(max_length=10)
+    engines = models.CharField(max_length=50)
+    transmissions = models.CharField(max_length=50)
+    drive_units = models.CharField(max_length=20)
+
+    class Meta:
+        managed = False
+        db_table = 'cars'
+
+
+class Customers(models.Model):
+    id = models.BigIntegerField(primary_key=True)
+    login = models.ForeignKey('Users', models.DO_NOTHING, unique=True)
+    fio = models.CharField(max_length=200, blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    address = models.CharField(max_length=200, blank=True, null=True)
+    email = models.CharField(max_length=100, blank=True, null=True)
+    person = models.CharField(max_length=15, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'customers'
+
+
+class Deliveries(models.Model):
+    id = models.BigIntegerField(primary_key=True)
+    shipper = models.ForeignKey('Suppliers', models.DO_NOTHING)
+    car = models.ForeignKey(Cars, models.DO_NOTHING)
+    date_order = models.DateField(blank=True, null=True)
+    cost = models.FloatField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'deliveries'
+
+
+class DjangoAdminLog(models.Model):
+    action_time = models.DateTimeField()
+    object_id = models.TextField(blank=True, null=True)
+    object_repr = models.CharField(max_length=200, blank=True, null=True)
+    action_flag = models.IntegerField()
+    change_message = models.TextField(blank=True, null=True)
+    content_type = models.ForeignKey('DjangoContentType', models.DO_NOTHING, blank=True, null=True)
+    user = models.ForeignKey(AuthUser, models.DO_NOTHING)
+
+    class Meta:
+        managed = False
+        db_table = 'django_admin_log'
+
+
+class DjangoContentType(models.Model):
+    app_label = models.CharField(max_length=100, blank=True, null=True)
+    model = models.CharField(max_length=100, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'django_content_type'
+        unique_together = (('app_label', 'model'),)
+
+
+class DjangoMigrations(models.Model):
+    app = models.CharField(max_length=255, blank=True, null=True)
+    name = models.CharField(max_length=255, blank=True, null=True)
+    applied = models.DateTimeField()
+
+    class Meta:
+        managed = False
+        db_table = 'django_migrations'
+
+
+class DjangoSession(models.Model):
+    session_key = models.CharField(primary_key=True, max_length=40)
+    session_data = models.TextField(blank=True, null=True)
+    expire_date = models.DateTimeField()
+
+    class Meta:
+        managed = False
+        db_table = 'django_session'
+
+
+class EcomappCar(models.Model):
+    name = models.CharField(max_length=100, blank=True, null=True)
+    slug = models.CharField(max_length=50, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'ecomapp_car'
+
+
+class Mycars(models.Model):
+    id = models.BigIntegerField(primary_key=True)
+    car = models.ForeignKey(Deliveries, models.DO_NOTHING)
+    car_body = models.CharField(max_length=20)
+    car_year = models.CharField(max_length=4)
+    engine = models.CharField(max_length=20)
+    transmission = models.CharField(max_length=20)
+    drive_unit = models.CharField(max_length=5)
+    color = models.CharField(max_length=25)
+    mileage = models.BigIntegerField(blank=True, null=True)
+    identification_number = models.CharField(max_length=20)
+    cost = models.FloatField(blank=True, null=True)
+    photos = models.CharField(max_length=255, blank=True, null=True)
+    date_of_delivery = models.DateField(blank=True, null=True)
+    description = models.CharField(max_length=2000, blank=True, null=True)
+    options = models.CharField(max_length=200, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'mycars'
+
+
+class Orders(models.Model):
+    id = models.BigIntegerField(primary_key=True)
+    request = models.ForeignKey('Requests', models.DO_NOTHING)
+    order_status = models.CharField(max_length=20)
+    start_date = models.DateField(blank=True, null=True)
+    end_date = models.DateField(blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'orders'
+
+
+class Requests(models.Model):
+    id = models.BigIntegerField(primary_key=True)
+    car = models.ForeignKey(Mycars, models.DO_NOTHING)
+    date_request = models.DateField()
+    customer = models.ForeignKey(Customers, models.DO_NOTHING)
+    request_status = models.CharField(max_length=20)
+    delivery = models.CharField(max_length=1)
+    delivery_address = models.CharField(max_length=200, blank=True, null=True)
+    cost = models.FloatField()
+
+    class Meta:
+        managed = False
+        db_table = 'requests'
+
+
+class Suppliers(models.Model):
+    id = models.BigIntegerField(primary_key=True)
+    name = models.CharField(max_length=50)
+    address = models.CharField(max_length=200, blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    email = models.CharField(max_length=100, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'suppliers'
+
+
+class Users(models.Model):
+    id = models.BigIntegerField(primary_key=True)
+    login = models.CharField(unique=True, max_length=20)
+    password = models.CharField(max_length=30)
+    user_type = models.CharField(max_length=10, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'users'
